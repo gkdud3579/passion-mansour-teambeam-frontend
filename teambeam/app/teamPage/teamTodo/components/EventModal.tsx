@@ -69,9 +69,9 @@ const EventModal: React.FC<EventModalProps> = ({
       title: eventTitle,
       startDate,
       endDate,
-      memo,
+      // memo,
       assignees: showAssignee ? assignees : undefined,
-      link: showLink ? link : undefined,
+      // link: showLink ? link : undefined,
     };
     console.log("Submitting Event:", event);
     onSave(title, event);
@@ -133,7 +133,7 @@ const EventModal: React.FC<EventModalProps> = ({
               />
             </div>
           )}
-          {showLink && (
+          {/* {showLink && (
             <div>
               <label>링크</label>
               <input
@@ -154,7 +154,7 @@ const EventModal: React.FC<EventModalProps> = ({
                 onChange={(e) => setMemo(e.target.value)}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

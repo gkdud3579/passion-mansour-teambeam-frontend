@@ -149,8 +149,8 @@ const TeamTodo: React.FC = () => {
                 startDate: event.startDate,
                 endDate: event.endDate,
                 assignees: event.assignees,
-                memo: event.memo,
-                link: event.link
+                // memo: event.memo,
+                // link: event.link
               };
               return {
                 ...task,
@@ -195,8 +195,8 @@ const TeamTodo: React.FC = () => {
         onSave={(event) => handleEventSave(modalTitle, event)}
         title={modalTitle}
         showAssignee={showAssignee}
-        showLink={showLink}
-        showMemo={showMemo}
+        // showLink={showLink}
+        // showMemo={showMemo}
         participants={participants}
       />
     </div>
