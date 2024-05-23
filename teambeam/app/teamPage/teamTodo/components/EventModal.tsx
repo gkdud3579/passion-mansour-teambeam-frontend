@@ -13,15 +13,12 @@ type EventModalProps = {
       title: string;
       startDate: string;
       endDate: string;
-      memo: string;
-      assignees?: string[];
-      link?: string;
+      assignees?: number[];
+      memo?: string;
     }
   ) => void;
   title: string;
   showAssignee?: boolean;
-  showLink?: boolean;
-  showMemo?: boolean;
   participants: Participant[];
 };
 
@@ -31,15 +28,12 @@ const EventModal: React.FC<EventModalProps> = ({
   onSave,
   title,
   showAssignee,
-  showLink,
-  showMemo,
   participants,
 }) => {
   const [eventTitle, setEventTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [assignees, setAssignees] = useState<string[]>([]);
-  const [link, setLink] = useState("");
+  const [assignees, setAssignees] = useState<number[]>([]);
   const [memo, setMemo] = useState("");
 
   useEffect(() => {
@@ -48,30 +42,31 @@ const EventModal: React.FC<EventModalProps> = ({
       setStartDate("");
       setEndDate("");
       setAssignees([]);
-      setLink("");
       setMemo("");
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    console.log("Modal open:", isOpen);
-  }, [isOpen]);
-
-  const handleAssigneeChange = (selectedOptions: any) => {
-    const selectedAssignees = selectedOptions.map(
-      (option: any) => option.value
-    );
-    setAssignees(selectedAssignees);
+  const handleAssigneeChange = (selectedOption: any) => {
+    setAssignees([selectedOption.value]);
   };
 
   const handleSubmit = () => {
+    if (
+      !eventTitle ||
+      !startDate ||
+      !endDate ||
+      (showAssignee && assignees.length === 0)
+    ) {
+      alert("모든 필드를 입력해주세요.");
+      return;
+    }
+
     const event = {
       title: eventTitle,
       startDate,
       endDate,
-      // memo,
-      assignees: showAssignee ? assignees : undefined,
-      // link: showLink ? link : undefined,
+      assignees: showAssignee ? assignees : [],
+      memo,
     };
     console.log("Submitting Event:", event);
     onSave(title, event);
@@ -79,7 +74,7 @@ const EventModal: React.FC<EventModalProps> = ({
   };
 
   const assigneeOptions = participants.map((participant) => ({
-    value: participant.name,
+    value: participant.id,
     label: participant.name,
   }));
 
@@ -103,7 +98,7 @@ const EventModal: React.FC<EventModalProps> = ({
           <div>
             <label>일정 시작</label>
             <input
-              type="datetime-local"
+              type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               required
@@ -112,7 +107,7 @@ const EventModal: React.FC<EventModalProps> = ({
           <div>
             <label>일정 종료</label>
             <input
-              type="datetime-local"
+              type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
@@ -121,10 +116,9 @@ const EventModal: React.FC<EventModalProps> = ({
             <div className="todoAssignee">
               <label>담당자</label>
               <Select
-                isMulti
                 value={assignees.map((assignee) => ({
                   value: assignee,
-                  label: assignee,
+                  label: participants.find((p) => p.id === assignee)?.name,
                 }))}
                 className="selectBox"
                 onChange={handleAssigneeChange}
@@ -133,28 +127,6 @@ const EventModal: React.FC<EventModalProps> = ({
               />
             </div>
           )}
-          {/* {showLink && (
-            <div>
-              <label>링크</label>
-              <input
-                type="text"
-                placeholder="참고자료 링크를 첨부해주세요."
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-              />
-            </div>
-          )}
-          {showMemo && (
-            <div>
-              <label>메모</label>
-              <input
-                type="text"
-                placeholder="메모를 입력하세요."
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-              />
-            </div>
-          )} */}
         </div>
       </div>
     </div>
