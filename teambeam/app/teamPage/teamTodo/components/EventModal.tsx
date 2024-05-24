@@ -68,7 +68,8 @@ const EventModal: React.FC<EventModalProps> = ({
       assignees: showAssignee ? assignees : [],
       memo,
     };
-    console.log("Submitting Event:", event);
+
+    console.log("Event being submitted to onSave:", event);
     onSave(title, event);
     onClose();
   };

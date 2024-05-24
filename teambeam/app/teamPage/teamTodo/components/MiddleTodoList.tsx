@@ -2,19 +2,21 @@
 
 import React, { useState } from "react";
 import LowerTodoList from "./LowerTodoList";
-import { TodoItem } from "../types";
+import { TodoItem, Participant } from "../types";
 import { ToggleDownBtnIcon, ToggleUpBtnIcon } from "@/app/_components/Icons";
 
 type Props = {
   task: TodoItem;
   onAddGoal: (type: string, middleTodoId?: string) => void;
   onStatusChange: (type: string, id: string, newStatus: boolean) => void;
+  participants: Participant[];
 };
 
 const MiddleTodoList: React.FC<Props> = ({
   task,
   onAddGoal,
   onStatusChange,
+  participants,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -23,7 +25,9 @@ const MiddleTodoList: React.FC<Props> = ({
   };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onStatusChange("middle", task.middleTodoId, !e.target.checked);
+    if (task.middleTodoId) {
+      onStatusChange("middle", task.middleTodoId, !e.target.checked);
+    }
   };
 
   return (
@@ -52,18 +56,25 @@ const MiddleTodoList: React.FC<Props> = ({
       </div>
       {isOpen && (
         <div className="lowerTodoContainer">
-          {task.bottomTodos.map((subtask) => (
+          {(task.bottomTodos ?? []).map((subtask) => (
             <LowerTodoList
               key={subtask.bottomTodoId}
               subtask={subtask}
               onStatusChange={(id, newStatus) =>
                 onStatusChange("bottom", id, newStatus)
               }
+              participants={participants}
             />
           ))}
           <button
             className="lowAddSubtask"
-            onClick={() => onAddGoal("하위 투두 추가 모달", task.middleTodoId)}
+            onClick={() => {
+              console.log(
+                "Adding lower todo with middleTodoId:",
+                task.middleTodoId
+              );
+              onAddGoal("하위 투두 추가 모달", task.middleTodoId);
+            }}
           >
             +
           </button>
