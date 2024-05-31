@@ -9,7 +9,11 @@ export default function Comment({ comment }: { comment: CommentType }) {
     <div className='comment-item'>
       <div className='profile-box'>
         <Image
-          src={comment.profileSrc}
+          src={
+            comment.member.profileImage !== null
+              ? comment.member.profileImage
+              : "/img/profile_default.png"
+          }
           alt='프로필'
           className='comment-profile'
           width={48}
@@ -18,11 +22,11 @@ export default function Comment({ comment }: { comment: CommentType }) {
       </div>
       <div className='comment-right'>
         <div className='right-info'>
-          <span>{comment.writer}</span>
+          <span>{comment.member.memberName}</span>
           <b>ㆍ</b>
           <span>{comment.createDate}</span>
         </div>
-        <p>{comment.postCommentContent}</p>
+        <p>{comment.content}</p>
       </div>
     </div>
   );

@@ -6,15 +6,18 @@ import {
   SearchIcon,
   TableSvg,
 } from "@/app/_components/Icons";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import "@/app/_styles/Board.scss";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { getPostTag, postAddPost } from "@/app/_api/board";
 
 type TagType = {
   tagId: number;
   tagName: string;
+  tagCategory: string;
+  projectId: number;
 };
 
 type CellType = {
@@ -26,19 +29,16 @@ const Page = () => {
   const [title, setTitle] = useState<string>("");
   const [notice, setNotice] = useState<boolean>(false);
   const [inputContent, setInputContent] = useState<string>("");
-  const [template, setTemplate] = useState<string>("board");
-  const [tags, setTags] = useState<TagType[]>([
-    { tagId: 21, tagName: "react" },
-    { tagId: 23, tagName: "개발" },
-    { tagId: 25, tagName: "기획" },
-    { tagId: 27, tagName: "vue" },
-  ]);
+  const [template, setTemplate] = useState<string>("text");
+  const [tags, setTags] = useState<TagType[]>([]);
   const [query, setQuery] = useState<string>("");
-  const [tagSelect, setTagSelect] = useState<string[]>([]);
+  const [tagSelect, setTagSelect] = useState<TagType[]>([]);
   const [isTagsMenu, setIsTagsMenu] = useState<boolean>(false);
   const [cols, setCols] = useState<number>(3);
   const [rows, setRows] = useState<number>(2);
   const [cells, setCells] = useState<CellType[][]>([]);
+
+  const params = useParams<{ projectId: string; boardId: string }>();
 
   useEffect(() => {
     const newCells: CellType[][] = [];
@@ -50,14 +50,27 @@ const Page = () => {
       newCells.push(rowCells);
     }
     setCells(newCells);
-  }, []);
 
-  const filterTag = tags.filter((tag) => {
+    const fetchTagData = async () => {
+      try {
+        const res = await getPostTag(`/team/${params.projectId}/tag`);
+        console.log("res : ", res);
+
+        setTags(res.data.tagResponses);
+      } catch (err) {
+        console.log("err  : ", err);
+      }
+    };
+
+    fetchTagData();
+  }, [params]);
+
+  const filterTag: TagType[] = tags.filter((tag: TagType) => {
     return (
       tag.tagName
         ?.toLocaleLowerCase()
         ?.includes(query?.toLocaleLowerCase()?.trim()) &&
-      !tagSelect.includes(tag.tagName)
+      !tagSelect.map((_tag) => _tag.tagName).includes(tag.tagName)
     );
   });
 
@@ -134,43 +147,62 @@ const Page = () => {
     [cells]
   );
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
     const data = {
-      notice,
       title,
-      type: template,
-      content: template !== "board" ? cells : inputContent,
-      tags: tagSelect,
+      content: template !== "text" ? cells : inputContent,
+      postType: template,
+      notice,
+      postTagIds: tagSelect.map((tag) => tag.tagId),
     };
+
     console.log(data);
-  }, [notice, title, template, inputContent, tagSelect, cells]);
+
+    try {
+      const res = await postAddPost(`/team/${params.projectId}/1/`, data);
+      console.log("res : ", res);
+
+      alert("게시글 생성이 완료되었습니다.");
+      router.push(`/teamPage/${params.projectId}/teamBoard`);
+    } catch (err) {
+      console.log("err  : ", err);
+    }
+  }, [notice, title, template, inputContent, tagSelect, cells, router, params]);
 
   return (
     <div>
       <form action={onSubmit}>
         <div className='top-board-view write'>
           <div className='topBoardLeft'>
-            <button className='back-btn' onClick={() => router.back()}>
+            <button
+              type='button'
+              className='back-btn'
+              onClick={() => router.back()}
+            >
               <BackBtnIcon size={13} />
             </button>
 
             <h2>글쓰기</h2>
           </div>
 
-          <button className='writeBtn'>등록</button>
+          <button type='submit' className='writeBtn'>
+            등록
+          </button>
         </div>
 
         <div className='templateWrap'>
           <h4>템플릿 선택</h4>
           <div className='templateSelect'>
             <button
-              className={`${template === "board" ? "active" : ""}`}
-              onClick={() => onTemplate("board")}
+              type='button'
+              className={`${template === "text" ? "active" : ""}`}
+              onClick={() => onTemplate("text")}
             >
               <BoardSvg size={104} />
               <span>게시글</span>
             </button>
             <button
+              type='button'
               className={`${template === "table" ? "active" : ""}`}
               onClick={() => onTemplate("table")}
             >
@@ -193,6 +225,7 @@ const Page = () => {
 
           <input
             type='text'
+            className='inputText'
             value={title}
             onChange={handleTitle}
             placeholder='제목'
@@ -203,7 +236,7 @@ const Page = () => {
               <SearchIcon size={24} />
               <input
                 type='text'
-                className='tagSearchInput'
+                className='inputText tagSearchInput'
                 value={query}
                 onChange={(e) => setQuery(e.target.value.trimStart())}
                 placeholder='태그 검색'
@@ -215,14 +248,14 @@ const Page = () => {
             {tagSelect?.length ? (
               <div className='selectTagWrap'>
                 {tagSelect.map((tag) => (
-                  <div key={tag} className='selectTagItem'>
-                    {tag}
+                  <div key={tag.tagId} className='selectTagItem'>
+                    {tag.tagName}
                     <span
                       className='tagClose'
                       onClick={() =>
                         setTagSelect(
                           tagSelect.filter((_tag) => {
-                            return _tag !== tag;
+                            return _tag.tagName !== tag.tagName;
                           })
                         )
                       }
@@ -245,7 +278,7 @@ const Page = () => {
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
                           setIsTagsMenu(true);
-                          setTagSelect((prev) => [...prev, tag.tagName]);
+                          setTagSelect((prev) => [...prev, tag]);
                         }}
                       >
                         {tag.tagName}
@@ -259,7 +292,7 @@ const Page = () => {
             ) : null}
           </div>
 
-          {template === "board" ? (
+          {template === "text" ? (
             <div className='editorBox'>
               <ReactQuill
                 modules={modules}
@@ -272,43 +305,59 @@ const Page = () => {
 
           {template === "table" ? (
             <>
-              <table>
-                <thead>
-                  {cells.slice(0, 1).map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {row.map((cell) => (
-                        <th key={cell.key}>
-                          <input
-                            type='text'
-                            value={cell.value}
-                            onChange={(e) => handleCellValue(e, rowIndex, cell)}
-                          />
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody>
-                  {cells.slice(1).map((row, rowIndex) => (
-                    <tr key={rowIndex + 1}>
-                      {row.map((cell) => (
-                        <td key={cell.key}>
-                          <input
-                            type='text'
-                            value={cell.value}
-                            onChange={(e) =>
-                              handleCellValue(e, rowIndex + 1, cell)
-                            }
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className='tableWrap'>
+                <table className='writerTable'>
+                  <thead>
+                    {cells.slice(0, 1).map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {row.map((cell) => (
+                          <th key={cell.key}>
+                            <input
+                              type='text'
+                              value={cell.value}
+                              onChange={(e) =>
+                                handleCellValue(e, rowIndex, cell)
+                              }
+                            />
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody>
+                    {cells.slice(1).map((row, rowIndex) => (
+                      <tr key={rowIndex + 1}>
+                        {row.map((cell) => (
+                          <td key={cell.key}>
+                            <input
+                              type='text'
+                              value={cell.value}
+                              onChange={(e) =>
+                                handleCellValue(e, rowIndex + 1, cell)
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <button
+                  type='button'
+                  className='colAddBtn'
+                  onClick={handleColumnAdd}
+                >
+                  열 추가
+                </button>
+              </div>
 
-              <button onClick={handleRowAdd}>행 추가</button>
-              <button onClick={handleColumnAdd}>열 추가</button>
+              <button
+                type='button'
+                className='rowAddBtn'
+                onClick={handleRowAdd}
+              >
+                행 추가
+              </button>
             </>
           ) : null}
         </div>

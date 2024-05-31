@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from "react";
 import "./MemoWriteModal.scss";
+import { postMemo } from "@/app/_api/memo";
+import { MemoType } from "../memo/page";
 
 type FormType = {
   title: string;
@@ -10,8 +12,10 @@ type FormType = {
 
 export default function MemoWriteModal({
   onCloseModal,
+  setMemoList,
 }: {
   onCloseModal: () => void;
+  setMemoList: React.Dispatch<React.SetStateAction<MemoType[]>>;
 }) {
   const [form, setForm] = useState<FormType>({
     title: "",
@@ -34,15 +38,21 @@ export default function MemoWriteModal({
 
   const onSubmit = useCallback(async () => {
     // "use server";
-    const data = {
-      memberId: 2,
-      memoTitle: form.title,
-      memoContent: form.content,
-    };
 
     console.log("title : ", form.title);
     console.log("content : ", form.content);
-  }, [form]);
+
+    try {
+      const res = await postMemo("/my/memo/", form);
+      console.log("res : ", res);
+
+      alert("메모 생성이 완료되었습니다.");
+      onCloseModal();
+      setMemoList((prev) => [...prev, res.data]);
+    } catch (err) {
+      console.log("err  : ", err);
+    }
+  }, [form, onCloseModal, setMemoList]);
 
   return (
     <div className='modal-bg'>

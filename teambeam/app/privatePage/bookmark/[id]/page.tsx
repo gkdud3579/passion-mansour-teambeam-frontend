@@ -1,72 +1,148 @@
 "use client";
 
+import { getBookmarkList } from "@/app/_api/bookmark";
 import BoardView from "@/app/_components/BoardView";
-import React, { useState } from "react";
+import { useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+
+type ContentType = {
+  key: string;
+  value: string;
+};
 
 export type BoardType = {
   postId: number;
-  postTitle: string;
+  title: string;
   postType: string;
-  postContent: string;
-  writer: string;
+  content: ContentType[][] | string;
+  member: {
+    memberId: number;
+    memberName: string;
+    profileImage: string;
+  };
+  projectId: number;
   createDate: string;
   updateDate: string;
-  tags: { tagId: number; tagName: string }[];
+  postTags: { tagId: number; tagName: string }[];
   notice: boolean;
   bookmark: boolean;
 };
 
 export type CommentType = {
   postCommentId: number;
-  postCommentContent: string;
-  writer: string;
+  content: string;
+  member: {
+    memberId: number;
+    memberName: string;
+    profileImage: string;
+  };
   profileSrc: string;
   createDate: string;
   updateDate: string;
 };
 
 const Page = () => {
-  const [boardData, setBoardData] = useState<BoardType>({
-    postId: 0,
-    postTitle: "게시글 제목",
-    postType: "board",
-    postContent:
-      "게시글 내용입니다 게시글 내용입니다 게시글 내용입니다 게시글 내용입니다 게시글 내용입니다 게시글 내용입니다 게시글 내용입니다 게시글 내용입니다 게시글 내용입니다 게시글 내용입니다  게시글 내용입니다",
-    writer: "홍길동",
-    createDate: "2024-04-23 09:51:13",
-    updateDate: "2024-04-23 09:51:13",
-    tags: [
-      { tagId: 23, tagName: "react" },
-      { tagId: 51, tagName: "개발" },
-    ],
-    notice: false,
-    bookmark: true,
-  });
+  const [boardData, setBoardData] = useState<BoardType | null>(null);
   const [comments, setComments] = useState<CommentType[]>([
     {
       postCommentId: 0,
-      postCommentContent:
+      content:
         "댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 ",
-      writer: "홍길동",
+      member: { memberId: 2, memberName: "홍길동", profileImage: "" },
       profileSrc: "/img/profile_default.png",
       createDate: "2024-01-03 10:42:12",
       updateDate: "2024-01-03 10:42:12",
     },
     {
       postCommentId: 1,
-      postCommentContent:
+      content:
         "댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 ",
-      writer: "홍길동",
+      member: { memberId: 2, memberName: "홍길동", profileImage: "" },
       profileSrc: "/img/profile_default.png",
       createDate: "2024-01-03 10:42:12",
       updateDate: "2024-01-03 10:42:12",
     },
   ]);
 
+  // {
+  //   postId: 0,
+  //   title: "게시글 제목",
+  //   postType: "table",
+  //   content: [
+  //     [
+  //       { key: "0_0", value: "HTTP" },
+  //       { key: "0_1", value: "기능" },
+  //       { key: "0_2", value: "URL" },
+  //     ],
+  //     [
+  //       { key: "1_0", value: "GET" },
+  //       { key: "1_1", value: "로그인" },
+  //       { key: "1_2", value: "/api/user/login" },
+  //     ],
+  //     [
+  //       { key: "2_0", value: "POST" },
+  //       { key: "2_1", value: "프로젝트 생성" },
+  //       { key: "2_2", value: "/api/project" },
+  //     ],
+  //   ],
+  //   member: { memberId: 2, memberName: "홍길동", profileImage: "" },
+  //   createDate: "2024-04-23 09:51:13",
+  //   updateDate: "2024-04-23 09:51:13",
+  //   postTags: [
+  //     { tagId: 21, tagName: "react" },
+  //     { tagId: 52, tagName: "개발" },
+  //     { tagId: 56, tagName: "기획" },
+  //   ],
+  //   notice: false,
+  //   bookmark: true,
+  // }
+
+  const params = useParams<{ id: string }>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getBookmarkList(`/my/bookmark/${params.id}`);
+        console.log("res : ", res);
+
+        setBoardData(res.data);
+      } catch (err) {
+        console.log("err  : ", err);
+      }
+    };
+
+    /*
+    const fetchCommentData = async () => {
+      try {
+        const res = await getComment(
+          `/team/${bookmark.projectId}/1/${params.id}/`
+        );
+        console.log("res : ", res);
+
+        setComments(res.data.postCommentResponseList);
+      } catch (err) {
+        console.log("err  : ", err);
+      }
+    };
+    */
+
+    fetchData();
+    //fetchCommentData();
+  }, [params]);
+
   return (
     <div>
-      <title>{boardData.postTitle}</title>
-      <BoardView boardData={boardData} comments={comments} />
+      {boardData !== null && (
+        <>
+          <title>{boardData.title}</title>
+          <BoardView
+            projectId={"undefined"}
+            boardData={boardData}
+            comments={comments}
+            setComments={setComments}
+          />
+        </>
+      )}
     </div>
   );
 };
