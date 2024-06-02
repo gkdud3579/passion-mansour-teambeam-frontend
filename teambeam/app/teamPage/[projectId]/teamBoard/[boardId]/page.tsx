@@ -2,11 +2,12 @@
 
 import BoardList from "@/app/_components/BoardList";
 import { ToggleDownBtnIcon, ToggleUpBtnIcon } from "@/app/_components/Icons";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "./TeamBoard.scss";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getPostList, getPostTag, getPostTagList } from "@/app/_api/board";
+import { deleteBookmark, postBookmark } from "@/app/_api/bookmark";
 
 export type Board = {
   postId: number;
@@ -47,11 +48,13 @@ const Page = () => {
 
       try {
         const res = await getPostTagList(
-          `/team/${params.projectId}/1/tags?${queryString}`
+          `/team/${params.projectId}/${params.boardId}/tags?${queryString}`
         );
 
-        console.log("tagToggle : ", res.data.postResponses);
-        setBoards(res.data.postResponses);
+        const sortNotice = sortNoticeData(res.data.postResponses);
+        const sortDate = sortDateData(res.data.postResponses);
+
+        setBoards([...sortNotice, ...sortDate]);
       } catch (err) {
         console.log(err);
       }
@@ -65,9 +68,12 @@ const Page = () => {
         const res = await getPostList(
           `/team/${params.projectId}/${params.boardId}/`
         );
-        console.log("res : ", res);
+        console.log("post list : ", res);
 
-        setBoards(res.data.postResponses);
+        const sortNotice = sortNoticeData(res.data.postResponses);
+        const sortDate = sortDateData(res.data.postResponses);
+
+        setBoards([...sortNotice, ...sortDate]);
       } catch (err) {
         console.log("err  : ", err);
       }
@@ -97,6 +103,22 @@ const Page = () => {
     }
   }, [params, activeTags, fetchTagToggleData]);
 
+  // 공지일 경우 가장 위로 보내기
+  const sortNoticeData = (data: Board[]) => {
+    return data.filter((item) => item.notice);
+  };
+
+  // 일반 게시글 최신순 정렬
+  const sortDateData = (data: Board[]) => {
+    return data
+      .filter((item) => !item.notice)
+      .sort(
+        (a, b) =>
+          Number(new Date(b.createDate)) - Number(new Date(a.createDate))
+      );
+  };
+
+  // 태그 토글 기능
   const onTagToggle = useCallback((tag: TagType) => {
     setActiveTags((prevTags: TagType[]) =>
       prevTags.map((_tag) => _tag.tagName).includes(tag.tagName)
@@ -105,9 +127,49 @@ const Page = () => {
     );
   }, []);
 
+  // All 태그 클릭 - 초기화
   const onAllToggle = useCallback(() => {
     setActiveTags([]);
   }, []);
+
+  // 북마크 토글
+  const handleBookmark = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>, data: Board) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isBoards = boards?.map((item) =>
+        item.postId === data.postId
+          ? { ...item, bookmark: !item.bookmark }
+          : item
+      );
+      setBoards(isBoards);
+
+      if (!data.bookmark) {
+        console.log("북마크 등록");
+        try {
+          const res = await postBookmark(`/my/bookmark/${data.postId}`);
+
+          console.log("bookmark add : ", res);
+        } catch (err) {
+          console.log(err);
+        }
+      } else {
+        console.log("북마크 해제");
+        try {
+          const res = await deleteBookmark(
+            `/my/bookmark/post?postId=${data.postId}`
+          );
+          // const res = await deleteBookmark(`/my/bookmark/${data.postId}`);
+
+          console.log("bookmark remove :", res);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    },
+    [boards]
+  );
 
   return (
     <div>
@@ -179,6 +241,7 @@ const Page = () => {
                     boardId={params.boardId}
                     board={board}
                     bookmark={null}
+                    handleBookmark={handleBookmark}
                     type={"board"}
                   />
                 );

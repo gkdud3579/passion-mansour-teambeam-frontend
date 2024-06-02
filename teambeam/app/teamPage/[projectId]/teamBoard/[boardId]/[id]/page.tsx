@@ -1,27 +1,24 @@
 "use client";
 
 import { getComment, getPostDetail } from "@/app/_api/board";
+import { deleteBookmark, postBookmark } from "@/app/_api/bookmark";
 import BoardView from "@/app/_components/BoardView";
 import Comment from "@/app/_components/Comment";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-
-type ContentType = {
-  key: string;
-  value: string;
-};
+import React, { useCallback, useEffect, useState } from "react";
 
 export type BoardType = {
   postId: number;
   title: string;
   postType: string;
-  content: ContentType[][] | string;
+  content: string;
   member: {
     memberId: number;
     memberName: string;
     profileImage: string;
   };
   projectId: number;
+  boardId: number;
   createDate: string;
   updateDate: string;
   postTags: { tagId: number; tagName: string }[];
@@ -44,35 +41,8 @@ export type CommentType = {
 
 const Page = () => {
   const [boardData, setBoardData] = useState<BoardType | null>(null);
-  const [comments, setComments] = useState<CommentType[]>([
-    {
-      postCommentId: 0,
-      content:
-        "댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 ",
-      member: { memberId: 2, memberName: "홍길동", profileImage: "" },
-      profileSrc: "/img/profile_default.png",
-      createDate: "2024-01-03 10:42:12",
-      updateDate: "2024-01-03 10:42:12",
-    },
-    {
-      postCommentId: 1,
-      content:
-        "댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 ",
-      member: { memberId: 2, memberName: "홍길동", profileImage: "" },
-      profileSrc: "/img/profile_default.png",
-      createDate: "2024-01-03 10:42:12",
-      updateDate: "2024-01-03 10:42:12",
-    },
-    {
-      postCommentId: 2,
-      content:
-        "댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 댓글 내용입니다 ",
-      member: { memberId: 2, memberName: "홍길동", profileImage: "" },
-      profileSrc: "/img/profile_default.png",
-      createDate: "2024-01-03 10:42:12",
-      updateDate: "2024-01-03 10:42:12",
-    },
-  ]);
+  const [comments, setComments] = useState<CommentType[]>([]);
+  const [isBookmark, setIsBookmark] = useState<boolean>(false);
 
   const params = useParams<{
     projectId: string;
@@ -89,6 +59,7 @@ const Page = () => {
         console.log("res : ", res);
 
         setBoardData(res.data);
+        setIsBookmark(res.data.bookmark);
       } catch (err) {
         console.log("err  : ", err);
       }
@@ -111,6 +82,37 @@ const Page = () => {
     fetchCommentData();
   }, [params]);
 
+  // 북마크 토글
+  const handleBookmark = useCallback(
+    async (data: BoardType) => {
+      if (!isBookmark) {
+        console.log("북마크 등록");
+        try {
+          const res = await postBookmark(`/my/bookmark/${data.postId}`);
+
+          console.log("bookmark add : ", res);
+          setIsBookmark(!isBookmark);
+        } catch (err) {
+          console.log(err);
+        }
+      } else {
+        console.log("북마크 해제");
+        try {
+          const res = await deleteBookmark(
+            `/my/bookmark/post?postId=${data.postId}`
+          );
+          // const res = await deleteBookmark(`/my/bookmark/${data.postId}`);
+
+          console.log("bookmark remove :", res);
+          setIsBookmark(!isBookmark);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    },
+    [isBookmark]
+  );
+
   return (
     <div>
       {boardData ? (
@@ -121,6 +123,9 @@ const Page = () => {
             boardData={boardData}
             comments={comments}
             setComments={setComments}
+            handleBookmark={handleBookmark}
+            type={"board"}
+            isBookmark={isBookmark}
           />
         </>
       ) : null}
