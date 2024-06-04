@@ -29,7 +29,7 @@ import { Participant } from "@/app/teamPage/[projectId]/teamTodo/types";
 // 프로젝트 정보 API 호출 함수
 const fetchProjectInfo = async (token: string | null, refreshToken: string | null): Promise<ProjectInfo | null> => {
   try {
-    const response = await axios.get(`http://34.22.108.250:8080/api/team/5/setting`, {
+    const response = await axios.get(`http://34.22.108.250:8080/api/team/1/setting`, {
       headers: {
         Authorization: token ?? "",
         RefreshToken: refreshToken ?? "",
@@ -46,7 +46,7 @@ const fetchProjectInfo = async (token: string | null, refreshToken: string | nul
 // 공지사항 API 호출 함수
 const fetchNotices = async (token: string | null): Promise<Notice[] | null> => {
   try {
-    const response = await axios.get('http://34.22.108.250:8080/api/team/5/notice', {
+    const response = await axios.get('http://34.22.108.250:8080/api/team/1/notice', {
       headers: {
         Authorization: token ?? '',
       },
@@ -157,27 +157,29 @@ const TeamPage: React.FC = () => {
   return (
     <div className="teamDashContainer">
       <div className="title">
-        <p>{projectInfo.projectName}</p>
+        <h1>{projectInfo.projectName}</h1>
       </div>
       <div className="description">
-        <p>프로젝트 설명</p>
+        <p className="subTitle">프로젝트 설명</p>
         <p>{projectInfo.description}</p>
       </div>
       <div className="notices">
-        <p>공지사항</p>
+        <p  className="subTitle">공지사항</p>
         <ul>
           {notices.map(notice => (
             <li key={notice.postId}>
-              <Link className="link" href={`/teamPage/5/teamBoard/5/${notice.postId}`}>
-                <p>{notice.title}</p>
-                <p>{notice.createDate}</p>
+              <Link className="link" href={`/teamPage/1/teamBoard/1/${notice.postId}`}>
+                <div className="noticeBox">
+                  <p>{notice.title}</p>
+                  <p>{notice.createDate}</p>
+                </div>
               </Link>
             </li>
           ))}
         </ul>
       </div>
       <div className="calendar">
-        <Link className="link" href={`/teamPage/5/teamCalendar`}>
+        <Link className="link" href={`/teamPage/1/teamCalendar`}>
           <FullCalendarComponent events={events} eventClick={handleEventClick} />
         </Link>
       </div>
