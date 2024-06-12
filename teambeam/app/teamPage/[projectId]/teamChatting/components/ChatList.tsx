@@ -138,7 +138,7 @@ const ChatList: React.FC = () => {
 
       profileImageCache.current[message.member.memberId] = profileImage;
 
-      const newMessage = {
+      const newMessage: Message = {
         id: message.messageId.toString(),
         text: message.messageContent,
         profileImage: profileImage,
@@ -165,6 +165,7 @@ const ChatList: React.FC = () => {
       };
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages, newMessage];
+        console.log("Messages after adding new message:", updatedMessages); // Debug log
         setTimeout(() => {
           if (chatAreaRef.current) {
             chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
@@ -181,7 +182,7 @@ const ChatList: React.FC = () => {
 
       profileImageCache.current[message.member.memberId] = profileImage;
 
-      const newMessage = {
+      const newMessage: Message = {
         id: message.messageId.toString(),
         text: message.messageContent,
         profileImage: profileImage,
@@ -208,6 +209,7 @@ const ChatList: React.FC = () => {
       };
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages, newMessage];
+        console.log("Messages after messageSent event:", updatedMessages); // Debug log
         setTimeout(() => {
           if (chatAreaRef.current) {
             chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
@@ -254,22 +256,29 @@ const ChatList: React.FC = () => {
           }
           return msg;
         });
-        if (
-          activeMessage &&
-          activeMessage.id === comment.messageId.toString()
-        ) {
-          const updatedActiveMessage = updatedMessages.find(
-            (msg) => msg.id === activeMessage.id
-          );
-          if (updatedActiveMessage) {
-            setActiveMessage(updatedActiveMessage);
+        console.log("Messages after comment event:", updatedMessages); // Debug log
+
+        // Ensure activeMessage is updated if it's the current message being viewed
+        setActiveMessage((prevActiveMessage) => {
+          if (
+            prevActiveMessage &&
+            prevActiveMessage.id === comment.messageId.toString()
+          ) {
+            const updatedActiveMessage = updatedMessages.find(
+              (msg) => msg.id === prevActiveMessage.id
+            );
+            console.log("Updated activeMessage:", updatedActiveMessage); // Debug log
+            return updatedActiveMessage || prevActiveMessage;
           }
-        }
+          return prevActiveMessage;
+        });
+
         setTimeout(() => {
           if (chatAreaRef.current) {
             chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
           }
         }, 0);
+
         return updatedMessages;
       });
     });
@@ -381,7 +390,7 @@ const ChatList: React.FC = () => {
           </div>
         ) : (
           <div className="messageList">
-            {messages.map((msg) => (
+            {messages.map((msg: Message) => (
               <div key={msg.id} className="message">
                 <Image
                   src={msg.profileImage || "/img/memberImage.jpeg"}
