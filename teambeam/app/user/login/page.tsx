@@ -14,6 +14,12 @@ interface ILoginForm {
 }
 
 const Login: React.FC = () => {
+	// 환경변수 테스트
+	console.log('normal test : ', '노멀 테스트');
+	console.log('TEST : ', `'${process.env.NEXT_PUBLIC_TEST}'`);
+	console.log('URL TEST : ', `'${process.env.NEXT_PUBLIC_BASE_URL}'`);
+	console.log('DECODING 테스트 : ', process.env.NEXT_PUBLIC_DECODING);
+	
   const router = useRouter();
   // 카카오 로그인 환경변수
   // const CLIENT_ID = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
