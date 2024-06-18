@@ -35,7 +35,7 @@ const Login: React.FC = () => {
         if (result.success) {
           router.push("/main");
         } else {
-          console.log(result.message);
+          alert(result.message);
         }
       },
       validate: (values) => {
