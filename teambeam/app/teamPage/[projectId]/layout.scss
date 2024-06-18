@@ -10,3 +10,25 @@
   margin-top: var(--headerSize);
   margin-left: var(--sideSize);
 }
+
+
+
+
+.todoItem {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.todoItem.highlight {
+  background-color: #ffc300; /* 강조 표시 색상 */
+  animation: highlight-animation 1s ease-in-out;
+}
+
+@keyframes highlight-animation {
+  from {
+    background-color: #ffc300;
+  }
+  to {
+    background-color: #fff;
+  }
+}
