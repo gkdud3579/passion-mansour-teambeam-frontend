@@ -1,3 +1,69 @@
+# TeamBeam
+
+**TeamBeam** is a collaboration tool designed to help teams manage project schedules efficiently.  
+It provides various features to facilitate smooth communication and task management among team members.
+
+
+
+## **Tech Stack**
+
+### **Backend**
+- Spring Boot  
+- Spring Security  
+- Redis  
+- Socket.io  
+
+### **Frontend**
+- React  
+- Next.js  
+- TypeScript  
+- Socket.io  
+- React Query  
+
+
+
+## **Project Structure**
+
+<p align="center">
+  <img src="https://github.com/kitewater/teambeam-backend/assets/97283971/16aede00-6a1a-4bb4-8554-11c672634790" width="100%">
+</p>
+
+
+
+## **My Contributions**
+
+### **1. Team Page**
+
+#### **Todo List Creation**
+[Todo List Demo Video](https://github.com/kitewater/teambeam-backend/assets/97283971/b9af08f4-0059-427d-83e5-aba8e4f856ec)  
+- Supported functionality to create and delete todo lists.  
+- Todo lists can be created in a **tree structure** with upper, middle, and lower-level tasks.  
+- Sub-todo lists include a **tag feature** that visually displays task categories and assigned team members.  
+
+
+
+#### **Calendar Functionality**
+[Calendar Demo Video](https://github.com/kitewater/teambeam-backend/assets/97283971/ed40118a-077d-4739-88fe-9cb1f48166b4)  
+- Supported the creation and deletion of schedules.  
+- **Calendar** displays schedules from upper-level todos as well as single-use events added directly to the calendar.  
+- Integrated **Kakao API** for adding locations through road name address searches.  
+
+
+
+#### **Chatting Functionality**
+[Chat Feature Demo Video](https://github.com/kitewater/teambeam-backend/assets/97283971/92f4b182-8022-4443-acd0-b8edde35d3a8)  
+- Enabled real-time WebSocket chat functionality.  
+- Nicknames and profile images set in **settings** are reflected in the chat.  
+- Designed in a **threaded format**, allowing users to comment under each specific chat.  
+
+
+
+**TeamBeam** maximizes teamwork and streamlines workflows through its powerful features, including todo lists, calendars, and real-time chat functionality.
+
+
+
+---
+
 # 팀글벙글
 팀글벙글은 프로젝트 일정 관리를 효율적으로 할 수 있도록 도와주는 협업 툴입니다.   
 다양한 기능을 통해 팀원 간의 소통과 작업 관리를 원활하게 진행할 수 있습니다. 
